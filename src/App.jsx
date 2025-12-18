@@ -75,6 +75,18 @@ function App() {
         body: JSON.stringify(dataToSend),
       })
       
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorData
+        try {
+          errorData = JSON.parse(errorText)
+        } catch {
+          errorData = { error: errorText || `서버 오류: ${response.status} ${response.statusText}` }
+        }
+        setError(errorData.error || `서버 오류: ${response.status} ${response.statusText}`)
+        return
+      }
+      
       const data = await response.json()
       
       if (data.success) {
@@ -96,8 +108,8 @@ function App() {
         setError(data.error || '시뮬레이션 실행 중 오류가 발생했습니다.')
       }
     } catch (err) {
-      setError('백엔드 서버에 연결할 수 없습니다. Flask 서버가 실행 중인지 확인하세요.')
-      console.error(err)
+      console.error('API 호출 오류:', err)
+      setError(`서버에 연결할 수 없습니다: ${err.message || '네트워크 오류가 발생했습니다.'}`)
     } finally {
       setLoading(false)
     }
